@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Book } from 'src/book/entity/book.entity';
+import { Category } from 'src/category/entity/category.entity';
 
 @Module({
     imports: [
@@ -15,7 +17,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
                 username: configService.get<string>('DB_USERNAME', 'postgres'),
                 password: configService.get<string>('DB_PASSWORD', 'postgres'),
                 database: configService.get<string>('DB_NAME', 'postgres'),
-                autoLoadEntities: true,
+                entities: [Book, Category],
                 synchronize: true,
             }),
         }),

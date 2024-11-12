@@ -20,7 +20,7 @@ export class Book {
     @Column()
     pages: number;
 
-    @ManyToOne(() => Category, (category) => category.books)
+    @ManyToOne(() => Category, (category) => category.books, { onDelete: 'CASCADE' })
     category: Category;
 
 }

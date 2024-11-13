@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsNotEmpty, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 
 
 export class CategoryDto {
@@ -16,5 +16,10 @@ export class CategoryDto {
     @ApiProperty({ default: false })
     @IsBoolean()
     isActive: boolean
+
+    @ApiProperty({ default: '' })
+    @IsUUID()
+    @IsOptional()
+    parentId: string
 
 }

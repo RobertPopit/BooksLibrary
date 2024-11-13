@@ -44,7 +44,23 @@ export class BooksController {
     @Get('/category/:categoryId')
     @ApiOperation({ summary: 'Get all books by category Id' })
     @ApiParam({ name: 'categoryId', description: 'Id of the category' })
-    async findBooksByCategory(@Param('categoryId') categoryId: string, @Query() options: IPaginationOptions,) {
+    async findBooksByCategoryPaginate(@Param('categoryId') categoryId: string, @Query() options: IPaginationOptions,) {
         return this.bookService.findBooksByCategoryPaginate(categoryId, options);
     }
+
+
+    @Get('/:categoryId')
+    @ApiOperation({ summary: 'Get all books by category Id' })
+    @ApiParam({ name: 'categoryId', description: 'Id of the category' })
+    async findBooksByCategory(@Param('categoryId') categoryId: string) {
+        return this.bookService.findBooksInCategory(categoryId);
+    }
+
+
+    @ApiOperation({ summary: 'Get breadcrumb category path for a book' })
+    @Get(':id/breadcrumb')
+    async getBookBreadcrumb(@Param('id') id: string): Promise<string> {
+        return this.bookService.getBookBreadcrumbInfinit(id);
+    }
 }
+

@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { Book } from "./entity/book.entity";
 import { Category } from "src/category/entity/category.entity";
 import { CreateBookDto } from "./dto/create-book.dto";
@@ -35,6 +35,10 @@ export class BookService {
             ...createBookDto,
             category,
         });
+
+        category.isActive = true;
+        await this.categoryRepository.save(category)
+
 
         return this.bookRepository.save(book);
     }
@@ -74,14 +78,22 @@ export class BookService {
     }
 
 
-    async findBooksByCategory(categoryId: string): Promise<Book[]> {
-        const books = await this.bookRepository.find({
-            where: { category: { id: categoryId } },
+    async findBooksInCategory(categoryId: string): Promise<Book[]> {
+        const category = await this.categoryRepository.findOne({
+            where: { id: categoryId },
+            relations: ['subcategories'],
         });
 
-        if (books.length === 0) {
-            throw new NotFoundException('No books found for this category');
+        if (!category) {
+            throw new NotFoundException('Category not found');
         }
+
+        const categoryIds = [category.id, ...category.subcategories.map((subcat) => subcat.id)];
+
+        const books = await this.bookRepository.find({
+            where: { category: { id: In(categoryIds) } },
+            relations: ['category'],
+        });
 
         return books;
     }
@@ -102,5 +114,61 @@ export class BookService {
         }
 
         return paginatedBooks;
+    }
+
+
+    async getBookBreadcrumb(bookId: string): Promise<string> {
+        const book = await this.bookRepository.findOne({
+            where: { id: bookId },
+            relations: ['category', 'category.parent'],
+        });
+
+        if (!book) {
+            throw new NotFoundException('Book not found');
+        }
+
+        const category = book.category;
+        let breadcrumb = category.name;
+
+        if (category.parent) {
+            breadcrumb = `${category.parent.name} > ${breadcrumb}`;
+        }
+
+        return breadcrumb;
+    }
+
+
+    async getBookBreadcrumbInfinit(bookId: string): Promise<string> {
+        const book = await this.bookRepository.findOne({
+            where: { id: bookId },
+            relations: ['category', 'category.parent'],
+        });
+
+        if (!book) {
+            throw new NotFoundException('Book not found');
+        }
+
+        const breadcrumb = await this.generateBreadcrumb(book.category);
+        return breadcrumb;
+    }
+
+
+    private async generateBreadcrumb(category: Category): Promise<string> {
+        const names = [];
+
+        let currentCategory = category;
+        while (currentCategory) {
+            names.unshift(currentCategory.name);
+            if (currentCategory.parent) {
+                currentCategory = await this.categoryRepository.findOne({
+                    where: { id: currentCategory.parent.id },
+                    relations: ['parent'],
+                });
+            } else {
+                break;
+            }
+        }
+
+        return names.join(' > ');
     }
 }

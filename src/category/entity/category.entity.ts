@@ -1,5 +1,5 @@
 import { Book } from 'src/book/entity/book.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
 
 @Entity('categories')
 export class Category {
@@ -14,6 +14,12 @@ export class Category {
 
     @Column({ default: true })
     isActive: boolean;
+
+    @ManyToOne(() => Category, (category) => category.subcategories)
+    parent: Category;
+
+    @OneToMany(() => Category, (category) => category.parent)
+    subcategories: Category[];
 
     @OneToMany(() => Book, (book) => book.category)
     books: Book[];

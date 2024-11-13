@@ -6,7 +6,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 export class Book {
     @PrimaryGeneratedColumn('uuid')
     @IsUUID()
-    id: number;
+    id: string;
 
     @Column({ unique: true })
     name: string;

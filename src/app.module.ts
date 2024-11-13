@@ -7,7 +7,6 @@ import { BookModule } from './book/book.module';
 import { CategoryModule } from './category/category.module';
 import { Book } from './book/entity/book.entity';
 import { Category } from './category/entity/category.entity';
-import { BookController } from './book/book.controller';
 
 @Module({
   imports: [
